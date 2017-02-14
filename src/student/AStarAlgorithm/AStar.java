@@ -36,8 +36,6 @@ public class AStar {
         long n = nodes.stream()
                 .min(Comparator.comparing(NodeStatus::getDistanceToTarget)).get().getId();
 
-
-        System.out.println("n = " + n);
         moveCount++;
 
 
