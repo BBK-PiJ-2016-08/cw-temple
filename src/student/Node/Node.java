@@ -7,7 +7,7 @@ public interface Node {
 
         long getId();
 
-        void setLabel(long id);
+        void setId(long id);
 
         boolean isVisited();
 

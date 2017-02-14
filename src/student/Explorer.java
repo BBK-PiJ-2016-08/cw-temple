@@ -52,9 +52,12 @@ public class Explorer {
 
           NodeImpl node = new NodeImpl(state.getCurrentLocation());
           node.setVisited(true);
-          aStar.allNodes.put(node, state.getNeighbours());
+          node.setNeighbours(state.getNeighbours());
+          aStar.allNodes.add(node);
+          aStar.ids.add(state.getCurrentLocation());
+          System.out.println(aStar.allNodes.size());
 
-          aStar.getNextMove(state);
+          state.moveTo(aStar.getNextMove(state));
       }
 
 
