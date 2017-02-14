@@ -1,12 +1,18 @@
 package student;
 
 import game.*;
+import student.AStarAlgorithm.AStar;
+import student.Node.*;
+import student.Node.Node;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Explorer {
+
+
 
   /**
    * Explore the cavern, trying to find the orb in as few steps as possible.
@@ -39,6 +45,19 @@ public class Explorer {
    * @param state the information available at the current state
    */
   public void explore(ExplorationState state) {
+
+      AStar aStar = new AStar();
+
+      while(state.getDistanceToTarget() != 0) {
+
+          NodeImpl node = new NodeImpl(state.getCurrentLocation());
+          node.setVisited(true);
+          aStar.allNodes.put(node, state.getNeighbours());
+
+          aStar.getNextMove(state);
+      }
+
+
     //TODO:
   }
 
