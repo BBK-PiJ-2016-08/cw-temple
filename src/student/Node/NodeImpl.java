@@ -5,6 +5,7 @@ import student.AStarAlgorithm.AStar;
 import student.Node.Node;
 
 import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -12,29 +13,48 @@ import java.util.Collection;
  */
 public class NodeImpl implements Node {
 
-    public long id;
+    private Integer moveCount;
     private boolean visited;
     private Collection<NodeStatus> neighbours;
+    private long currentLocation;
+    private int distanceFromOrb;
 
-    public NodeImpl(final long id) {
-        this.setId(id);
+
+    public NodeImpl(final int tileID) {
+
+        this.moveCount = moveCount;
     }
 
-    public NodeImpl(){
+    public void setDistanceFromOrb(int distance){
 
+        this.distanceFromOrb = distance;
     }
+    @Override
+    public int getDistanceFromOrb(){
 
+        return this.distanceFromOrb;
+    }
 
     @Override
-    public long getId() {
-        return this.id;
+    public long getMoveCount() {
+        return this.moveCount;
     }
 
     @Override
-    public void setId(long id) {
+    public void setMoveCount(int moveCount) {
 
 
-        this.id = id;
+        this.moveCount = moveCount;
+    }
+
+    public long getLocation() {
+        return this.currentLocation;
+    }
+
+    public void setLocation(long location) {
+
+        this.currentLocation = location;
+
     }
     public void setNeighbours(Collection<NodeStatus> neighbours) {
 

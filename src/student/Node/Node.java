@@ -5,12 +5,14 @@ package student.Node;
  */
 public interface Node {
 
-        long getId();
+        long getMoveCount();
 
-        void setId(long id);
+        void setMoveCount(int moveCount);
 
         boolean isVisited();
 
         void setVisited(boolean visited);
+
+        int getDistanceFromOrb();
 }
 

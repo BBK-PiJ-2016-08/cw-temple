@@ -46,23 +46,22 @@ public class Explorer {
    */
   public void explore(ExplorationState state) {
 
-      AStar aStar = new AStar();
+      AStar aStar = new AStar(state);
+
+
+
 
       while(state.getDistanceToTarget() != 0) {
 
-          NodeImpl node = new NodeImpl(state.getCurrentLocation());
-          node.setVisited(true);
-          node.setNeighbours(state.getNeighbours());
-          aStar.allNodes.add(node);
-          aStar.ids.add(state.getCurrentLocation());
-          System.out.println(aStar.allNodes.size());
+          state.moveTo(aStar.getNextMove());
 
-          state.moveTo(aStar.getNextMove(state));
+
       }
 
 
-    //TODO:
   }
+
+
 
   /**
    * Escape from the cavern before the ceiling collapses, trying to collect as much
