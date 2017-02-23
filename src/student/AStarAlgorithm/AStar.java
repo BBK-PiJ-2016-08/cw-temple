@@ -17,10 +17,12 @@ public class AStar {
 
     private List<NodeImpl> allNodes = new ArrayList<>();
     private List<Long> idsVisited = new ArrayList<>();
-    private List<Long> nodesToVisit = new ArrayList<>();
+    private List<Long> reverseNodes = new ArrayList<>();
+    private List<Long> reverseNodesImpl = new ArrayList<>();
+    private int getLocation = 1;
+
     private boolean isGoingBackwards = false;
     private long nodeToGetTo = 0;
-
 
 
     private int moveCount = 0;
@@ -47,21 +49,20 @@ public class AStar {
         allNodes.add(node);
     }
 
-    private void checkIfStateHasBeenSaved(){
-        if (!idsVisited.contains(state.getCurrentLocation())){
+    private void checkIfStateHasBeenSaved() {
+        if (!idsVisited.contains(state.getCurrentLocation())) {
             saveStateInfo();
-            System.out.println("Save info called");
 
         }
 
     }
-
-    private long moveBackwards(){
+/*
+    private long moveBackwards() {
 
         long nextMove = nodesToVisit.get(0);
         nodesToVisit.remove(0);
 
-        if (nextMove == this.nodeToGetTo){
+        if (nextMove == this.nodeToGetTo) {
             System.out.println("Nodes to visit is empty");
             this.isGoingBackwards = false;
 
@@ -72,13 +73,14 @@ public class AStar {
         return nextMove;
 
     }
+    */
 
-    public int getIndexOfCurrentState(){
+    private int getIndexOfLocation(long stateLocation) {
 
         int index = 0;
-        for (int i = 0; i < allNodes.size(); i++){
+        for (int i = 0; i < allNodes.size(); i++) {
 
-            if (allNodes.get(i).getLocation() == state.getCurrentLocation()){
+            if (allNodes.get(i).getLocation() == stateLocation) {
 
                 index = i;
 
@@ -90,15 +92,22 @@ public class AStar {
     public long getNextMove() {
 
         checkIfStateHasBeenSaved();
+        if (reverseNodes.size() == 0) {
+            isGoingBackwards = false;
+        }
 
-        if (isGoingBackwards){
+        if (isGoingBackwards) {
 
-           return moveBackwards();
+
+            getLocation = 1;
+            reverseNodesImpl.clear();
+            long returnLong = reverseNodes.get(0);
+            reverseNodes.remove(0);
+            return returnLong;
         }
 
 
-
-        Collection<NodeStatus> nextNodes = allNodes.get(getIndexOfCurrentState())
+        Collection<NodeStatus> nextNodes = allNodes.get(getIndexOfLocation(state.getCurrentLocation()))
                 .getNeighbours().stream()
                 .filter(s -> !idsVisited.contains(s.getId()))
                 .collect(Collectors.toList());
@@ -107,17 +116,17 @@ public class AStar {
             System.out.println("is empty called");
 
 
-            moveBackwardsToFindAlternateRoute();
+            //moveBackwardsToFindAlternateRoute();
 
-            return moveBackwards();
+            return moveBackwardsToFindAlternateRoute();
 
         }
 
-            moveCount++;
-            return nextNodes.stream()
-                    .min(Comparator.comparing(NodeStatus::getDistanceToTarget))
-                    .get()
-                    .getId();
+        moveCount++;
+        return nextNodes.stream()
+                .min(Comparator.comparing(NodeStatus::getDistanceToTarget))
+                .get()
+                .getId();
 
 
         //long nextMoveLong = nextNodes.stream().mapToLong(s -> allNodes.stream().mapToLong(n -> s == n.getId()));
@@ -180,17 +189,15 @@ public class AStar {
             }
         }
 
-        List<NodeStatus> noDuplicatesNeighboursNotVisited = neighboursNotVisited.stream().distinct().collect(Collectors.toList());
+        neighboursNotVisited = neighboursNotVisited.stream().distinct().collect(Collectors.toList());
 
 
-
-       // Collection<NodeStatus> allNeighbours = allNodes.stream().map(NodeImpl::getNeighbours).findFirst().get();
-
+        // Collection<NodeStatus> allNeighbours = allNodes.stream().map(NodeImpl::getNeighbours).findFirst().get();
 
 
-       // long allNeigh = allNeighbours.stream().map(NodeStatus::getId).filter(s -> !idsVisited.contains(s)).findFirst().get();
+        // long allNeigh = allNeighbours.stream().map(NodeStatus::getId).filter(s -> !idsVisited.contains(s)).findFirst().get();
 
-       // System.out.println("neighbour = " + allNeigh);
+        // System.out.println("neighbour = " + allNeigh);
 
         /*
         Collection<NodeStatus> nextNodes = allNodes.stream().map(NodeImpl::getNeighbours)
@@ -201,7 +208,6 @@ public class AStar {
         */
 
 
-        long nextNode = findClosestNumberToTargetFromCollection(noDuplicatesNeighboursNotVisited);
 
         /*List<NodeImpl> firstNeighbour = allNodes.stream().map(NodeImpl::getNeighbours)
                 .filter(s -> !idsVisited.equals(s.stream().map(NodeStatus::getId)));
@@ -226,50 +232,156 @@ public class AStar {
 */
 
 
-        return nextNode;
+        return findClosestNumberToTargetFromCollection(neighboursNotVisited);
     }
 
-    private Long findClosestNeighbourFromListOfNeighbours(Collection<NodeStatus> neighboursOfCurrentState, Long nodeID) {
+    private Long findClosestNeighbourFromListOfNeighbours(Collection<NodeStatus> neighboursOfCurrentState,
+                                                          Long nodeID, List<Long> nodesVisited) {
 
 
         long nearest = -1;
         long idToMoveTo = 10000000;
-        for (NodeStatus n : neighboursOfCurrentState){
+        for (NodeStatus n : neighboursOfCurrentState) {
 
-            System.out.println("neighbours = " + n.getId());
+            // System.out.println("neighbours = " + n.getId());
 
-            if (n.getId() == nodeID){
+            if (n.getId() == nodeID) {
                 saveStateInfo();
                 return n.getId();
-            }else {
+            } else {
 
                 long d = Math.abs(nodeID - n.getId());
-                if (d < idToMoveTo && !nodesToVisit.contains(n.getId())) {
+                if (d < idToMoveTo && idsVisited.contains(n.getId()) && !nodesVisited.contains(n.getId())) {
 
                     idToMoveTo = d;
                     nearest = n.getId();
+
+                }
+            }
+        }
+
+
+        return nearest;
+    }
+
+    /*
+        private NodeImpl removeDuplicateStatesAndFindAlternateRoute(long l) {
+
+            for (int i = nodesToVisit.size() - 1; i > 0; i--) {
+
+                int j = getIndexOfLocation(nodesToVisit.get(i));
+                List<Long> nodesWhichHasNeighbourInNodesToVisit = new ArrayList<>();
+
+                for (NodeStatus n : allNodes.get(j).getNeighbours()) {
+
+                    if (!nodesToVisit.contains(n.getId())) {
+                        nodesWhichHasNeighbourInNodesToVisit.add(n.getId());
+                        System.out.println("added = " + n.getId());
+
+                    }
+
+                }
+
+                if (nodesWhichHasNeighbourInNodesToVisit.size() > 1) {
+                    System.out.println("removed = " + nodesToVisit.get(j));
+
+                    nodesToVisit.remove(j);
+
+                    return allNodes.get(j);
+
+
+                }
+
+
+            }
+            System.out.println("remove duplicates and find alternate route called");
+
+
+            return null;
+        }
+        */
+/*
+    private NodeImpl getVisitedNode(NodeImpl node) {
+        for (NodeStatus n : node.getNeighbours()) {
+
+            if (idsVisited.contains(n.getId())) {
+
+                return n;
+
+            }
+
+        }
+        return null;
+    }
+*/
+    private void recursiveFindPathToOrb(long destination, NodeImpl currentLocation, List<Long> nodesToVisit, List<Long> nodesVisited) {
+
+        long numberToFind = findClosestNeighbourFromListOfNeighbours(currentLocation.getNeighbours(), destination, reverseNodesImpl);
+
+        List<Long> checkNull = new ArrayList<>();
+
+        if (numberToFind > 0) {
+            for (NodeStatus n : currentLocation.getNeighbours()) {
+
+
+                if (n.getId() == destination) {
+                    System.out.println("Found Destination");
+                    reverseNodesImpl.add(currentLocation.getLocation());
+                    nodesVisited.add(n.getId());
+                    nodesToVisit.add(n.getId());
+                    this.reverseNodes = nodesToVisit;
+                    return;
+                }
+
+                if (n.getId() == numberToFind && !nodesVisited.contains(n.getId())) {
+                    checkNull.add(n.getId());
+                    reverseNodesImpl.add(currentLocation.getLocation());
+                    currentLocation = allNodes.get(getIndexOfLocation(n.getId()));
+                    nodesVisited.add(n.getId());
+                    nodesToVisit.add(n.getId());
+                    recursiveFindPathToOrb(destination, currentLocation, nodesToVisit, nodesVisited);
                 }
             }
         }
 
 
 
+        if (checkNull.isEmpty()) {
+            currentLocation = allNodes.get(getIndexOfLocation(reverseNodesImpl.get(reverseNodesImpl.size() - getLocation)));
+            getLocation++;
 
-        return nearest;
+            //currentLocation = allNodes.get(getIndexOfLocation(nodesToVisit.get(nodesVisited.size() - 1)));
+
+            nodesToVisit.remove(nodesToVisit.size() - 1);
+
+
+            recursiveFindPathToOrb(destination, currentLocation, nodesToVisit, nodesVisited);
+
+        }
     }
 
-
-    private void moveBackwardsToFindAlternateRoute() {
+    private long moveBackwardsToFindAlternateRoute() {
         this.isGoingBackwards = true;
 
 
-        this.nodeToGetTo = findFirstNodeWithUnusedNeighbour();
+        nodeToGetTo = findFirstNodeWithUnusedNeighbour();
 
-        System.out.println("The id we need to get to is = " + this.nodeToGetTo);
 
-        long currentLocation = state.getCurrentLocation();
-        NodeImpl currentNode = allNodes.get(moveCount);
+        NodeImpl currentNode = allNodes.get(getIndexOfLocation(state.getCurrentLocation()));
 
+
+        List<Long> nodesToVisit = new ArrayList<>();
+        List<Long> nodesVisited = new ArrayList<>();
+        recursiveFindPathToOrb(nodeToGetTo, currentNode, nodesToVisit, nodesVisited);
+
+
+        if (reverseNodes.size() == 0) {
+            isGoingBackwards = false;
+        }
+        long returnLong = reverseNodes.get(0);
+        reverseNodes.remove(0);
+        return returnLong;
+        /*
 
         while (!nodesToVisit.contains(this.nodeToGetTo)) {
 
@@ -284,7 +396,18 @@ public class AStar {
                 }
             }
             //currentNode = allNodes.stream().map(s -> s.getMoveCount() == idMoveCount).findFirst().get();
+
+
+
+            if (nodesToVisit.contains(currentLocation)){
+
+
+                 currentNode = removeDuplicateStatesAndFindAlternateRoute(currentNode.getLocation());
+
+            }
+
             currentLocation = currentNode.getLocation();
+
             //List<Long> neighboursOfCurrentState = state.getNeighbours().stream().map(s -> s.getId()).collect(Collectors.toList());
 
             long nextId = findClosestNeighbourFromListOfNeighbours(currentNode.getNeighbours(), this.nodeToGetTo);
@@ -305,8 +428,9 @@ public class AStar {
             System.out.println(l);
 
         }
+        */
+
 
     }
-
 
 }
