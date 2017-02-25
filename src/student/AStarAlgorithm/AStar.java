@@ -21,7 +21,7 @@ public class AStar {
     private List<Long> unaccessableNodes = new ArrayList<>();
     private List<Long> nodesAlreadyAttempted = new ArrayList<>();
 
-    private List<Long> allCurrentLocationsSearched = new ArrayList<>();
+    private Map<Integer, Long> allCurrentLocationsSearched = new HashMap<Integer, Long>();
     private int getLocation = 1;
     private int numberOfTimesMovedFurtherFromOrb = 0;
 
@@ -92,6 +92,7 @@ public class AStar {
 
         if (isGoingBackwards) {
             getLocation = 1;
+            unaccessableNodes.clear();
             allCurrentLocationsSearched.clear();
             long returnLong = reverseNodes.get(0);
             reverseNodes.remove(0);
@@ -177,8 +178,7 @@ public class AStar {
 
         for (int i = 0; i < neighbours.size(); i++) {
 
-            if (!idsVisited.contains(neighbours.get(i).getId()) && !unaccessableNodes.contains(neighbours.get(i).getId())
-                    && !nodesAlreadyAttempted.contains(neighbours.get(i).getId())) {
+            if (!idsVisited.contains(neighbours.get(i).getId()) && !nodesAlreadyAttempted.contains(neighbours.get(i).getId())) {
                 neighboursNotVisited.add(neighbours.get(i));
 
             }
@@ -221,15 +221,15 @@ public class AStar {
 
         long numberToFind = findClosestNeighbourFromListOfNeighbours(currentLocation.getNeighbours(), destination, nodesVisited);
 
+
         List<Long> checkNull = new ArrayList<>();
 
         if (numberToFind > 0) {
             for (NodeStatus n : currentLocation.getNeighbours()) {
 
-
                 if (n.getId() == destination) {
-                    getLocation = 1;
-                    allCurrentLocationsSearched.add(currentLocation.getLocation());
+                    allCurrentLocationsSearched.put(getLocation, currentLocation.getLocation());
+                    getLocation++;
                     nodesVisited.add(n.getId());
                     nodesToVisit.add(n.getId());
                     this.reverseNodes = nodesToVisit;
@@ -238,9 +238,10 @@ public class AStar {
 
                 if (n.getId() == numberToFind && !nodesVisited.contains(n.getId())) {
                     checkNull.add(n.getId());
-                    getLocation = 1;
 
-                    allCurrentLocationsSearched.add(currentLocation.getLocation());
+
+                    allCurrentLocationsSearched.put(getLocation, currentLocation.getLocation());
+                    getLocation++;
                     currentLocation = allNodes.get(getIndexOfLocation(n.getId()));
 
                     nodesVisited.add(n.getId());
@@ -253,19 +254,23 @@ public class AStar {
 
 
         if (checkNull.isEmpty()) {
-            currentLocation = allNodes.get(getIndexOfLocation(allCurrentLocationsSearched.get(allCurrentLocationsSearched.size() - getLocation)));
-            getLocation++;
 
+            getLocation--;
+
+            currentLocation = allNodes.get(getIndexOfLocation(allCurrentLocationsSearched.get(getLocation )));
+
+            allCurrentLocationsSearched.remove(getLocation);
             nodesToVisit.remove(nodesToVisit.get(nodesToVisit.size() - 1));
 
-            if (nodesToVisit.isEmpty()) {
-
-                return;
-            }
+            //System.out.println("CURRENT LOCATION = ");
 
 
             recursiveFindPathToOrb(destination, currentLocation, nodesToVisit, nodesVisited);
 
+
+            if (nodesToVisit.isEmpty()) {
+                return;
+            }
         }
     }
 
@@ -295,8 +300,6 @@ public class AStar {
 
                 if (nodeToGetTo != 0) {
 
-                    unaccessableNodes.add(nodeToGetTo);
-
                     currentNode = allNodes.get(getIndexOfLocation(state.getCurrentLocation()));
 
                 } else {
@@ -306,25 +309,17 @@ public class AStar {
 
                 }
                 nodesAlreadyAttempted.add(nodeToGetTo);
-
-            }else {
-
-                nodeToGetTo = clearAllNodes();
-                currentNode = allNodes.get(getIndexOfLocation(state.getCurrentLocation()));
+                List<Long> nodesToVisit = new ArrayList<>();
+                List<Long> nodesVisited = new ArrayList<>();
+                getLocation = 0;
+                recursiveFindPathToOrb(nodeToGetTo, currentNode, nodesToVisit, nodesVisited);
 
             }
-
-            List<Long> nodesToVisit = new ArrayList<>();
-            List<Long> nodesVisited = new ArrayList<>();
-            recursiveFindPathToOrb(nodeToGetTo, currentNode, nodesToVisit, nodesVisited);
-
 
         }
         unaccessableNodes.clear();
 
-        if (reverseNodes.size() == 0)
-
-        {
+        if (reverseNodes.size() == 1) {
             isGoingBackwards = false;
         }
 
