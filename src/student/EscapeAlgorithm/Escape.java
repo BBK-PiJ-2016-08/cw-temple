@@ -11,66 +11,52 @@ import java.util.*;
 public class Escape {
 
   private EscapeState state;
-  private int MAX_NUMBER_OF_MOVES;
-  private Node startNode;
-  private Node endNode;
-  private Map<Node, Node> predecessors = new HashMap<>();
-  private Map<Node, Integer> distance = new HashMap<>();
-  private Set<Node> uncheckedNodes = new HashSet<>();
-  private Set<Node> checkedNodes = new HashSet<>();
-  private List<Edge> edges = new ArrayList<>();
+  private Map<Node, Node> previousNodes = new HashMap<>();
+  private Map<Node, Integer> distanceToTarget = new HashMap<>();
+  private List<Node> uncheckedNodes = new ArrayList<>();
+  private List<Edge> allEdges = new ArrayList<>();
   private int totalMoves = 0;
 
 
   public Escape(EscapeState state) {
-
     this.state = state;
-    this.MAX_NUMBER_OF_MOVES = state.getTimeRemaining();
-    this.startNode = state.getCurrentNode();
-    this.endNode = state.getExit();
-
   }
 
-  public void initialiseState(Node firstNode) {
+  public void initialiseState(Node initialNode) {
 
     List<Node> nodes = new ArrayList<>(state.getVertices());
 
     for (Node n : nodes) {
-
       for (Edge e : n.getExits()) {
-
-        this.edges.add(e);
+        this.allEdges.add(e);
       }
-
     }
-    distance.put(firstNode, 0);
-    uncheckedNodes.add(firstNode);
+    distanceToTarget.put(initialNode, 0);
+    uncheckedNodes.add(initialNode);
     while (uncheckedNodes.size() > 0) {
       Node node = getMinimum(uncheckedNodes);
-      checkedNodes.add(node);
       uncheckedNodes.remove(node);
       findMinimalDistances(node);
     }
-
   }
 
   public List<Node> getPathToTarget(Node target) {
 
-    List<Node> path = new ArrayList<>();
+    List<Node> pathToTarget = new ArrayList<>();
     Node step = target;
 
-    // check if a path exists
-    if (predecessors.get(step) == null) {
-      return null;
+    if (previousNodes.get(step) == null) {
+      return null; //Path doesn't exist
     }
-    path.add(step);
-    while (predecessors.get(step) != null) {
-      setTotalMoves(predecessors.get(step).getEdge(step).length);
-      step = predecessors.get(step);
-      path.add(step);
+    pathToTarget.add(step);
+    while (previousNodes.get(step) != null) {
+      setTotalMoves(previousNodes.get(step).getEdge(step).length);
+      step = previousNodes.get(step);
+      pathToTarget.add(step);
+
     }
-    Collections.reverse(path);
-    return path;
+    Collections.reverse(pathToTarget);
+    return pathToTarget;
   }
 
   private void setTotalMoves(int totalMoves) {
@@ -83,66 +69,44 @@ public class Escape {
     return totalMoves;
   }
 
-  private int getDistance(Node node, Node target) {
+  private int getDistanceToTarget(Node node, Node target) {
 
-    for (Edge edge : this.edges) {
-
-      if (edge.getSource().equals(node)
-          && edge.getDest().equals(target)) {
-        return edge.length();
-      }
+    Optional<Edge> edge = allEdges.stream().filter(s-> s.getSource().equals(node))
+        .filter(e -> e.getDest().equals(target)).findFirst();
+    if (edge.isPresent()){
+      return edge.get().length();
+    }else {
+      throw new IllegalArgumentException("Error: Edge not found");
     }
-    throw new IllegalArgumentException("Error: Distance not found");
   }
-
-  private List<Node> getNeighbors(Node node) {
-    List<Node> neighbors = new ArrayList<>();
-    for (Edge edge : edges) {
-      if (edge.getSource().equals(node)
-          && !isChecked(edge.getDest())) {
-        neighbors.add(edge.getDest());
-      }
-    }
-    return neighbors;
-  }
-
 
   private void findMinimalDistances(Node node) {
-    List<Node> adjacentNodes = getNeighbors(node);
-    for (Node target : adjacentNodes) {
-      if (getShortestDistance(target) > getShortestDistance(node)
-          + getDistance(node, target)) {
-        distance.put(target, (getShortestDistance(node)
-            + getDistance(node, target)));
-        predecessors.put(target, node);
+    for (Node target : node.getNeighbours()) {
+      if (getShortestDistanceToDestination(target) >
+          getShortestDistanceToDestination(node) + getDistanceToTarget(node, target)) {
+        distanceToTarget.put(target, (getShortestDistanceToDestination(node)
+            + getDistanceToTarget(node, target)));
+        previousNodes.put(target, node);
         uncheckedNodes.add(target);
       }
     }
 
   }
 
-  private boolean isChecked(Node vertex) {
-    return checkedNodes.contains(vertex);
-  }
-
-  private int getShortestDistance(Node destination) {
-    Integer d = distance.get(destination);
-    if (d == null) {
+  private int getShortestDistanceToDestination(Node destination) {
+    Integer i = distanceToTarget.get(destination);
+    if (i == null) {
       return Integer.MAX_VALUE;
     } else {
-      return d;
+      return i;
     }
   }
 
-  private Node getMinimum(Set<Node> vertices) {
-    Node minimum = null;
+  private Node getMinimum(List<Node> vertices) {
+    Node minimum = vertices.get(0);
     for (Node vertex : vertices) {
-      if (minimum == null) {
+      if (getShortestDistanceToDestination(vertex) < getShortestDistanceToDestination(minimum)) {
         minimum = vertex;
-      } else {
-        if (getShortestDistance(vertex) < getShortestDistance(minimum)) {
-          minimum = vertex;
-        }
       }
     }
     return minimum;

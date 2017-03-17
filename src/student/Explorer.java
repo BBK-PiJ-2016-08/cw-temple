@@ -1,17 +1,13 @@
 package student;
 
 import game.*;
-import student.AStarAlgorithm.AStar;
-import student.Node.*;
-import student.Node.Node;
+import student.ExploreAlgorithm.Explore;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import student.Node.EscapeNodeListManager;
+
 
 public class Explorer {
-
 
 
   /**
@@ -46,21 +42,17 @@ public class Explorer {
    */
   public void explore(ExplorationState state) {
 
-      AStar aStar = new AStar(state);
+    Explore aStar = new Explore(state);
+
+    while (state.getDistanceToTarget() != 0) {
+
+      state.moveTo(aStar.getNextMove());
 
 
-
-
-      while(state.getDistanceToTarget() != 0) {
-
-          state.moveTo(aStar.getNextMove());
-
-
-      }
+    }
 
 
   }
-
 
 
   /**
@@ -86,8 +78,51 @@ public class Explorer {
    *
    * @param state the information available at the current state
    */
+
   public void escape(EscapeState state) {
 
-    //TODO: Escape from the cavern before time runs out
+    checkGold(state);
+
+    while (!state.getCurrentNode().equals(state.getExit())){
+
+      EscapeNodeListManager listManager = new EscapeNodeListManager(state);
+
+      List<Node> listOfMoves = listManager.getListOfMoves();
+
+      boolean headingBack = false;
+      while (!listOfMoves.isEmpty()){
+        checkGold(state);
+        if (!headingBack){
+          List<Node> movesToEnd = listManager.checkMovesToEnd(state);
+          if (movesToEnd != null){
+            listOfMoves = movesToEnd;
+            headingBack = true;
+
+          }else {
+            for (Node n : state.getCurrentNode().getNeighbours()){
+              if (n.getTile().getGold() > 100){
+                listOfMoves.clear();
+                listOfMoves.add(n);
+                break;
+              }
+
+            }
+          }
+        }
+
+        state.moveTo(listOfMoves.get(0));
+        listOfMoves.remove(0);
+
+      }
+
+
+    }
+
+  }
+  private void checkGold(EscapeState state){
+    if (state.getCurrentNode().getTile().getGold() > 0) {
+      state.getCurrentNode().getTile().getGold();
+      state.pickUpGold();
+    }
   }
 }

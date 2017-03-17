@@ -1,19 +1,16 @@
-package student.AStarAlgorithm;
+package student.ExploreAlgorithm;
 
 import game.*;
 
-import student.Node.Node;
 import student.Node.NodeImpl;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Created by jakeholdom on 14/02/2017.
  */
-public class AStar {
+public class Explore {
 
     private List<NodeImpl> allNodes = new ArrayList<>();
     private List<Long> idsVisited = new ArrayList<>();
@@ -35,7 +32,7 @@ public class AStar {
     private ExplorationState state;
 
 
-    public AStar(ExplorationState state) {
+    public Explore(ExplorationState state) {
 
         this.state = state;
 
@@ -80,7 +77,7 @@ public class AStar {
 
         checkIfStateHasBeenSaved();
 
-        if (numberOfTimesMovedFurtherFromOrb > 6) {
+        if (numberOfTimesMovedFurtherFromOrb > 10) {
             numberOfTimesMovedFurtherFromOrb = 0;
             return moveBackwardsToFindAlternateRoute();
 
@@ -176,10 +173,10 @@ public class AStar {
                 .collect(Collectors.toList());
         List<NodeStatus> neighboursNotVisited = new ArrayList<>();
 
-        for (int i = 0; i < neighbours.size(); i++) {
+        for (NodeStatus n : neighbours) {
 
-            if (!idsVisited.contains(neighbours.get(i).getId()) && !nodesAlreadyAttempted.contains(neighbours.get(i).getId())) {
-                neighboursNotVisited.add(neighbours.get(i));
+            if (!idsVisited.contains(n.getId()) && !nodesAlreadyAttempted.contains(n.getId())) {
+                neighboursNotVisited.add(n);
 
             }
         }
@@ -268,9 +265,6 @@ public class AStar {
             recursiveFindPathToOrb(destination, currentLocation, nodesToVisit, nodesVisited);
 
 
-            if (nodesToVisit.isEmpty()) {
-                return;
-            }
         }
     }
 

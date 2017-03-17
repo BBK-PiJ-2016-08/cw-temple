@@ -1,11 +1,7 @@
 package student.Node;
 
 import game.*;
-import student.AStarAlgorithm.AStar;
-import student.Node.Node;
-
 import java.util.Collection;
-import java.util.List;
 
 
 /**
