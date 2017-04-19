@@ -2,7 +2,7 @@ package student.ExploreAlgorithm;
 
 import game.*;
 
-import student.Node.NodeImpl;
+import student.Node.ExploreNodeImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  */
 public class Explore {
 
-  private List<NodeImpl> allNodes = new ArrayList<>(); //Array storing all nodes
+  private List<ExploreNodeImpl> allNodes = new ArrayList<>(); //Array storing all nodes
   private List<Long> idsVisited = new ArrayList<>(); //Array storing all ID's visited
   private List<Long> reverseNodes = new ArrayList<>(); //Array of nodes when going backwards
   private List<Long> nodesAlreadyAttempted = new ArrayList<>();//Array of nodes already attempted
@@ -44,17 +44,12 @@ public class Explore {
   }
 
   /**
-   * Saves current state information into appropriate arrays.
+   * Saves current state information into their respective arrays.
    */
   private void saveStateInfo() {
-
-    //implement check to see if node already visited
-
     idsVisited.add(state.getCurrentLocation());//Adds ID to array
-    NodeImpl node = new NodeImpl(moveCount);//Creates new Node initialised with the move count
-    node.setDistanceFromOrb(state.getDistanceToTarget());//Sets distance to target
+    ExploreNodeImpl node = new ExploreNodeImpl();//Creates new ExploreNode initialised with the move count
     node.setLocation(state.getCurrentLocation());//Sets current location
-    node.setVisited(true);//Sets to visited
     node.setNeighbours(state.getNeighbours());//Sets neighbours
     allNodes.add(node);//Adds current node to array of all nodes
   }
@@ -75,7 +70,7 @@ public class Explore {
    * Method which runs through the array of nodes to find the index
    * of the node that needs to be found.
    *
-   * @param stateNode Node which needs to be found
+   * @param stateNode ExploreNode which needs to be found
    * @return index of where node is in AllNodes
    */
   private int getIndexOfLocation(long stateNode) {
@@ -83,7 +78,7 @@ public class Explore {
     int index = 0;//initialise int
     for (int i = 0; i < allNodes.size(); i++) {
 
-      if (allNodes.get(i).getLocation() == stateNode) {//if location equals location provided
+      if (allNodes.get(i).getLocation() == stateNode) { //if location equals location provided
 
         index = i;
 
@@ -140,7 +135,7 @@ public class Explore {
    * increments or reinitialise's the numberOfTimeMovedFurtherFromOrb int, on whether the
    * character is moving further away or closer to the orb.
    *
-   * @param nodeFromOrb Node which is further or closer to orb
+   * @param nodeFromOrb ExploreNode which is further or closer to orb
    */
   private void incrementNumberIfCharacterMovesFurtherFromOrb(NodeStatus nodeFromOrb) {
     if (nodeFromOrb.getDistanceToTarget() > state.getDistanceToTarget()) {
@@ -216,7 +211,7 @@ public class Explore {
    */
   private long findFirstNodeWithUnusedNeighbour() {
 
-    List<NodeStatus> neighbours = allNodes.stream().map(NodeImpl::getNeighbours)
+    List<NodeStatus> neighbours = allNodes.stream().map(ExploreNodeImpl::getNeighbours)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
     List<NodeStatus> neighboursNotVisited = new ArrayList<>();
@@ -244,7 +239,7 @@ public class Explore {
    * @param nodesToVisit Nodes that still need to be searched to reach target
    * @param nodesVisited Nodes already searched to reach target
    */
-  private void findPathToDestination(long destination, NodeImpl currentLocation,
+  private void findPathToDestination(long destination, ExploreNodeImpl currentLocation,
       List<Long> nodesToVisit, List<Long> nodesVisited) {
 
     long numberToFind = findClosestNeighbourFromListOfNeighbours(currentLocation.getNeighbours(),
@@ -361,7 +356,7 @@ public class Explore {
 
     while (reverseNodes.isEmpty()) {
       nodeToGetTo = findFirstNodeWithUnusedNeighbour();
-      NodeImpl currentNode;
+      ExploreNodeImpl currentNode;
 
       if (!nodesAlreadyAttempted.contains(nodeToGetTo)) {
 

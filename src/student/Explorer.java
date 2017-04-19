@@ -61,7 +61,7 @@ public class Explorer {
    * out, and this should be prioritized above collecting gold.
    * <p>
    * You now have access to the entire underlying graph, which can be accessed through EscapeState.
-   * getCurrentNode() and getExit() will return you Node objects of interest, and getVertices()
+   * getCurrentNode() and getExit() will return you ExploreNode objects of interest, and getVertices()
    * will return a collection of all nodes on the graph.
    * <p>
    * Note that time is measured entirely in the number of steps taken, and for each step
