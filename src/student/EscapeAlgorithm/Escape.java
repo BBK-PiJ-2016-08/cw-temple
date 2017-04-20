@@ -7,7 +7,6 @@ import java.util.*;
 
 /**
  * Created by jakeholdom on 27/02/2017.
- *
  * Based on the Dijkstra algorithm
  */
 public class Escape {
@@ -53,7 +52,7 @@ public class Escape {
   }
 
   /**
-   * This method finds the nearest node from the list of undefined nodes
+   * This method finds the nearest node from the list of undefined nodes.
    *
    * @return The closest node to the initial node in the undefined nodes list
    */
@@ -93,8 +92,8 @@ public class Escape {
   private void findMinimalDistances(Node node) {
     for (Node neighbour : node.getNeighbours()) {
 
-      if (checkShortestDistance(neighbour) >
-          checkShortestDistance(node) + getDistanceToTarget(node, neighbour)) {
+      if (checkShortestDistance(neighbour)
+          > checkShortestDistance(node) + getDistanceToTarget(node, neighbour)) {
 
         distanceToInitialNode.put(neighbour, (checkShortestDistance(node)
             + getDistanceToTarget(node, neighbour))); //Adds node and distance to node to map
@@ -157,7 +156,7 @@ public class Escape {
   }
 
   /**
-   * Setter: Called every time a new move is added to the path of moves
+   * Setter: Called every time a new move is added to the path of moves.
    *
    * @param totalMoves How much time the given move will take
    */
@@ -167,7 +166,7 @@ public class Escape {
   }
 
   /**
-   * Getter: The total amount of time the path will take to complete
+   * Getter: The total amount of time the path will take to complete.
    *
    * @return int of the amount of time the path will take to complete
    */
