@@ -15,7 +15,7 @@ public class ExploreNodeImpl implements ExploreNode {
 
 
   /**
-   * Getter: gets location
+   * Getter: gets location.
    *
    * @return location
    */
@@ -25,7 +25,7 @@ public class ExploreNodeImpl implements ExploreNode {
   }
 
   /**
-   * Setter: sets Location
+   * Setter: sets Location.
    *
    * @param location long of state's location
    */
@@ -37,7 +37,7 @@ public class ExploreNodeImpl implements ExploreNode {
   }
 
   /**
-   * Getter: gets Neighbours
+   * Getter: gets Neighbours.
    *
    * @return collection of Nodestatus/Neighbours
    */
@@ -48,7 +48,7 @@ public class ExploreNodeImpl implements ExploreNode {
   }
 
   /**
-   * Setter: sets Neighbours
+   * Setter: sets Neighbours.
    *
    * @param neighbours collection of Nodestatus/Neighbours
    */

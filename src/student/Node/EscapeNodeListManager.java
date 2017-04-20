@@ -18,17 +18,15 @@ import student.EscapeAlgorithm.Escape;
 public class EscapeNodeListManager {
 
 
-  private EscapeState state;
+  private EscapeState state; //State of character
 
   /**
    * Constructor: Initialise EscapeNodeListManager class with the state.
    *
    * @param state The current position of the character
    */
-  public EscapeNodeListManager(EscapeState state){
-
+  public EscapeNodeListManager(EscapeState state) {
     this.state = state;
-
   }
 
   /**
@@ -38,11 +36,11 @@ public class EscapeNodeListManager {
    * @return Final list of moves
    */
   public List<Node> getListOfMoves() {
-    Escape escape = new Escape(state);
-    List<Node> nodes = getListOfHighestGoldAmounts(state);
+    Escape escape = new Escape(state); //new instance of Dijkstra Algorithm
+    List<Node> nodes = getListOfHighestGoldAmounts(state); //List sorted by order of highest gold
     return findSmallestListOfMoves(
         getTopFiveListOfNodesPaths(nodes, state, escape));
-
+    //return list with smallest path of the top 5 nodes of gold amounts
 
   }
 
@@ -66,23 +64,23 @@ public class EscapeNodeListManager {
    * @param escape The current instance of the Dijkstra algorithm
    * @return List of List of nodes containing the path to the top five nodes
    */
-  private List<List<Node>> getTopFiveListOfNodesPaths(List<Node> nodes, EscapeState state, Escape escape){
-
+  private List<List<Node>> getTopFiveListOfNodesPaths(List<Node> nodes,
+      EscapeState state, Escape escape) {
     List<List<Node>> topFiveNodeLists = new ArrayList<>();
-    Collections.reverse(nodes);
+    Collections.reverse(nodes); //put list in correct order
     int nodeNumber = 0;
     escape.initialiseState(state.getCurrentNode());
-    while (topFiveNodeLists.size() < 5){
-      List<Node> nodePath = escape.getPathToTarget(nodes.get(nodeNumber));
+    while (topFiveNodeLists.size() < 5) { //loop until there are 5 lists inside the list
+      List<Node> nodePath = escape.getPathToTarget(nodes.get(nodeNumber)); //get paths for nodes
       if (nodePath != null) {
-        topFiveNodeLists.add(nodePath);
+        topFiveNodeLists.add(nodePath); //add path to list
         nodeNumber++;
-      }else {
+      } else {
         nodes.remove(nodeNumber);
       }
 
     }
-    return topFiveNodeLists;
+    return topFiveNodeLists; //return list of path lists
   }
 
 
@@ -98,7 +96,7 @@ public class EscapeNodeListManager {
     int smallest = Integer.MAX_VALUE;
     for (List<Node> lists : listOfListOfMoves) {
 
-      if (lists.size() < smallest) {
+      if (lists.size() < smallest) { //If current list size is smaller than the smallest so far
 
         listOfMoves = lists;
         smallest = lists.size();
@@ -107,14 +105,15 @@ public class EscapeNodeListManager {
     }
 
     if (!listOfMoves.isEmpty()) {
-      listOfMoves.remove(0); // remove initial value
+      listOfMoves.remove(0); // remove initial value which is the node that the character is
+      //currently on
 
     } else {
 
       return null;
     }
 
-    return listOfMoves;
+    return listOfMoves; //return shortest list of moves
 
   }
 
@@ -126,22 +125,25 @@ public class EscapeNodeListManager {
    * @param state The current state in which the character is in
    */
   public List<Node> checkMovesToEnd(EscapeState state) {
-    Escape escapeToExitNew = new Escape(state);
-    escapeToExitNew.initialiseState(state.getCurrentNode());
+    Escape escapeToExitNew = new Escape(state); //initialises new EscapeState
+    escapeToExitNew.initialiseState(state.getCurrentNode()); //Initialises with current state
+    //Gets move to end
     List<Node> listOfMovesToEnd = escapeToExitNew.getPathToTarget(state.getExit());
 
-    int movesToEnd = escapeToExitNew.getTotalMoves();
+    int movesToEnd = escapeToExitNew.getTotalMoves(); //Get moves it will take to get to the exit
 
+    //If the amount of moves + 30 (To allow for extra time if needed) is more than the time
+    //remaining then head back.
     if (movesToEnd + 30 > state.getTimeRemaining()) {
 
       if (listOfMovesToEnd != null) {
-        listOfMovesToEnd.remove(0);
+        listOfMovesToEnd.remove(0); //remove first value which is current tile
       }
-    }else{
+    } else {
       return null;
     }
 
-    return listOfMovesToEnd;
+    return listOfMovesToEnd; //return list of moves to the end
 
   }
 

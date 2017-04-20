@@ -2,10 +2,10 @@ package student.ExploreAlgorithm;
 
 import game.*;
 
-import student.Node.ExploreNodeImpl;
-
 import java.util.*;
 import java.util.stream.Collectors;
+import student.Node.ExploreNodeImpl;
+
 
 /**
  * Created by jakeholdom on 14/02/2017.
@@ -14,7 +14,7 @@ public class Explore {
 
   private List<ExploreNodeImpl> allNodes = new ArrayList<>(); //Array storing all nodes
   private List<Long> idsVisited = new ArrayList<>(); //Array storing all ID's visited
-  private List<Long> reverseNodes = new ArrayList<>(); //Array of nodes when going backwards
+  private List<Long> goingBackwardsNodes = new ArrayList<>(); //Array of nodes when going backwards
   private List<Long> nodesAlreadyAttempted = new ArrayList<>();//Array of nodes already attempted
   //when going backwards to search
 
@@ -48,7 +48,7 @@ public class Explore {
    */
   private void saveStateInfo() {
     idsVisited.add(state.getCurrentLocation());//Adds ID to array
-    ExploreNodeImpl node = new ExploreNodeImpl();//Creates new ExploreNode initialised with the move count
+    ExploreNodeImpl node = new ExploreNodeImpl();//Initialise ExploreNodeImpl
     node.setLocation(state.getCurrentLocation());//Sets current location
     node.setNeighbours(state.getNeighbours());//Sets neighbours
     allNodes.add(node);//Adds current node to array of all nodes
@@ -104,19 +104,19 @@ public class Explore {
       return moveBackwardsToFindAlternateRoute();//Then move find alternate route
 
     }
-    if (reverseNodes.size() == 0) {//If character has finished going backwards
-      reverseNodes.clear();
+    if (goingBackwardsNodes.size() == 0) { //If character has finished going backwards
+      goingBackwardsNodes.clear();
       isGoingBackwards = false;//change to false
     }
 
-    if (isGoingBackwards) {//If character is going backwards
+    if (isGoingBackwards) { //If character is going backwards
 
       return getNextBackwardsMove();
     }
 
     Collection<NodeStatus> nextNodes = findAllNodesNotVisited();
 
-    if (nextNodes.isEmpty()) {
+    if (nextNodes.isEmpty()) { //If there are no more possible moves, go backwards
 
       return moveBackwardsToFindAlternateRoute();
 
@@ -127,7 +127,7 @@ public class Explore {
     NodeStatus nextNode = getShortestNodeToTarget(nextNodes);//Returns the closest node to the orb
 
     incrementNumberIfCharacterMovesFurtherFromOrb(nextNode);
-    return nextNode.getId();
+    return nextNode.getId();//return move
 
   }
 
@@ -157,17 +157,17 @@ public class Explore {
 
     getLocation = 1;
     allCurrentNodesSearched.clear();
-    long nextMove = reverseNodes.get(0);//Get next move for going backwards
-    reverseNodes.remove(0);//Remove the next move from list
+    long nextMove = goingBackwardsNodes.get(0);//Get next move for going backwards
+    goingBackwardsNodes.remove(0);//Remove the next move from list
     List<Long> nextNodesNeighbours = new ArrayList<>();
 
-    for (NodeStatus n : state.getNeighbours()) {//Gets all neighbours of current node
+    for (NodeStatus n : state.getNeighbours()) { //Gets all neighbours of current node
 
       nextNodesNeighbours.add(n.getId());//Adds them to a list
 
     }
-    if (!nextNodesNeighbours.contains(nextMove)) {//If neighbours doesn't contain next move
-      reverseNodes.clear();//clear current list, not correct route
+    if (!nextNodesNeighbours.contains(nextMove)) { //If neighbours doesn't contain next move
+      goingBackwardsNodes.clear();//clear current list, not correct route
       nextMove = moveBackwardsToFindAlternateRoute();//Find alternate route
 
     }
@@ -183,9 +183,9 @@ public class Explore {
   private Collection<NodeStatus> findAllNodesNotVisited() {
 
     return allNodes.get(getIndexOfLocation(state.getCurrentLocation()))
-        .getNeighbours().stream()
-        .filter(s -> !idsVisited.contains(s.getId()))
-        .collect(Collectors.toList());
+        .getNeighbours().stream() //finds all nodes currently accessed neighbours
+        .filter(s -> !idsVisited.contains(s.getId()))//checks whether the id's have been visited
+        .collect(Collectors.toList());//collects into a list on NodeStatus's
 
   }
 
@@ -198,7 +198,7 @@ public class Explore {
   private NodeStatus getShortestNodeToTarget(Collection<NodeStatus> nodes) {
     return nodes.stream()
         .min(Comparator.comparing(NodeStatus::getDistanceToTarget))
-        .get();
+        .get();//returns node with smallest distance to target
   }
 
   /**
@@ -213,20 +213,23 @@ public class Explore {
 
     List<NodeStatus> neighbours = allNodes.stream().map(ExploreNodeImpl::getNeighbours)
         .flatMap(Collection::stream)
-        .collect(Collectors.toList());
-    List<NodeStatus> neighboursNotVisited = new ArrayList<>();
+        .collect(Collectors.toList());//Collects all neighbours of all nodes visited
+    List<NodeStatus> neighboursNotVisited = new ArrayList<>();//initialise new list to collect
+    // all neighbours not visited
 
-    for (NodeStatus n : neighbours) {
+    for (NodeStatus n : neighbours) { //loops through all neighbours
 
       if (!idsVisited.contains(n.getId()) && !nodesAlreadyAttempted.contains(n.getId())) {
-        neighboursNotVisited.add(n);
+        neighboursNotVisited.add(n);//if neighbour hasn't been visited add to this list
 
       }
     }
 
+    //remove any duplicates
     neighboursNotVisited = neighboursNotVisited.stream().distinct().collect(Collectors.toList());
 
-    return getShortestNodeToTarget(neighboursNotVisited).getId();
+    return getShortestNodeToTarget(neighboursNotVisited).getId();//return neighbour with shortest
+    //distance to target
   }
 
   /**
@@ -243,22 +246,24 @@ public class Explore {
       List<Long> nodesToVisit, List<Long> nodesVisited) {
 
     long numberToFind = findClosestNeighbourFromListOfNeighbours(currentLocation.getNeighbours(),
-        destination, nodesVisited);
+        destination, nodesVisited); //Returns the target number to create a path to
 
-    List<Long> checkNull = new ArrayList<>();
+    List<Long> checkNull = new ArrayList<>();//Array to check whether the path is null which means
+    //that the the target is the tile that the character is already on.
 
     if (numberToFind > 0) {
       for (NodeStatus n : currentLocation.getNeighbours()) {
 
+        //if the neighbour is the final destination we are trying to find
         if (n.getId() == destination) {
           allCurrentNodesSearched.put(getLocation, currentLocation.getLocation());
           getLocation++;
           nodesVisited.add(n.getId());
           nodesToVisit.add(n.getId());
-          this.reverseNodes = nodesToVisit;
+          this.goingBackwardsNodes = nodesToVisit;
           return;
         }
-
+        //if the neighbour is the number we are trying to find
         if (n.getId() == numberToFind && !nodesVisited.contains(n.getId())) {
           checkNull.add(n.getId());
 
@@ -268,13 +273,15 @@ public class Explore {
 
           nodesVisited.add(n.getId());
           nodesToVisit.add(n.getId());
+          //recursively run the method again with an updated current location and nodesVisited and
+          //nodesToVisit
           findPathToDestination(destination, currentLocation, nodesToVisit, nodesVisited);
         }
       }
 
     }
 
-    if (checkNull.isEmpty()) {
+    if (checkNull.isEmpty()) { //Deal with error of trying to find tile which character is on
 
       getLocation--;
 
@@ -295,24 +302,24 @@ public class Explore {
    * Finds the closest neighbour to a specified node id which hasn't been visited yet.
    *
    * @param neighboursOfCurrentState Collection of all neighbours of the specified state
-   * @param nodeID Target node id to compare the neighbour id's to
+   * @param nodeId Target node id to compare the neighbour id's to
    * @param nodesVisited Nodes already visited
    * @return long value of node which is closest to destination
    */
   private long findClosestNeighbourFromListOfNeighbours(
       Collection<NodeStatus> neighboursOfCurrentState,
-      long nodeID, List<Long> nodesVisited) {
+      long nodeId, List<Long> nodesVisited) {
 
     long nearest = -1;
     long idToMoveTo = 10000000;
     for (NodeStatus n : neighboursOfCurrentState) {
 
-      if (n.getId() == nodeID) {
+      if (n.getId() == nodeId) {
         saveStateInfo();
         return n.getId();
       } else {
 
-        long d = Math.abs(nodeID - n.getId());
+        long d = Math.abs(nodeId - n.getId());
         if (d < idToMoveTo && idsVisited.contains(n.getId()) && !nodesVisited.contains(n.getId())) {
 
           idToMoveTo = d;
@@ -352,9 +359,10 @@ public class Explore {
    * @return next node to visit
    */
   private long moveBackwardsToFindAlternateRoute() {
-    this.isGoingBackwards = true;
 
-    while (reverseNodes.isEmpty()) {
+    this.isGoingBackwards = true;//boolean set to true for getNextMove method
+
+    while (goingBackwardsNodes.isEmpty()) {
       nodeToGetTo = findFirstNodeWithUnusedNeighbour();
       ExploreNodeImpl currentNode;
 
@@ -380,13 +388,13 @@ public class Explore {
 
     }
 
-    if (reverseNodes.size() == 1) {
+    if (goingBackwardsNodes.size() == 1) {
       isGoingBackwards = false;
     }
 
-    long returnLong = reverseNodes.get(0);
+    long returnLong = goingBackwardsNodes.get(0);
 
-    reverseNodes.remove(0);
+    goingBackwardsNodes.remove(0);
     return returnLong;
   }
 }
