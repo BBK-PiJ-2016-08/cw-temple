@@ -25,4 +25,5 @@ Another algorithm which could have been implemented is the AStar algorithm that 
 
 ## Classes
 
-#### Explore.java ##### - Returns the Long value for the Explorer to move the character to next
+#### Explore.java 
+##### Returns the Long value for the Explorer to move the character to next
