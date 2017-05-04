@@ -15,3 +15,9 @@ In rare cases there have been no more possible moves for the character to go to.
 
 ## Explore
 
+The Explore game gives you access to the whole graph of nodes inside the map. There are a number of different algorithm's that could have been implemented for this specific game, however this implementation takes advantage of the Dijkstra algorithm to find the shortest path to a given node which works by setting a start node and processing each neighbour from that node and saving the path with the smallest weighting but also checking if other paths have a smaller weighting throughout and then carrying on this process until the destination node is reached. To know which node to go to next an algorithm is implemented that gathers the data of how many coins are on each tile and finds the paths of the nodes with the top 5 amounts of gold on them. These lists are then checked to see which one is closest to the current destination of the character and then that path is chosen. 
+    After each move the distance it will take to reach the exit is checked against the current amount of time left before the game ends. If this distance is too far then the character will head back to the exit in enough time. 
+    
+### Problems
+
+Another algorithm which could have been implemented is the AStar algorithm that works by checking every possible route from the characters current state to the exit. Then checking the paths of each route to find each path that fits inside the time restraints and which route collects the most amount of gold. However, this algorithm would have been very processor intensive and I wasn't sure whether the the time taken to complete the game because of the computing time would have been ok.
