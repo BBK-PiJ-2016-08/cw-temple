@@ -25,5 +25,17 @@ Another algorithm which could have been implemented is the AStar algorithm that 
 
 ## Classes
 
-#### Explore.java 
+#### Explore.java -
 ##### Returns the Long value for the Explorer to move the character to next
+
+#### Escape.java -
+##### Returns the List/path for the Explorer to move the character to next
+
+#### ExploreNode.java -
+##### Interface for the node information in the explore phase
+
+#### ExploreNodeImpl.java -
+##### Implementation of the Explore node
+
+#### EscapeNodeListManager.java -
+##### Refines which list of paths is the optimal list for the character to go to next
