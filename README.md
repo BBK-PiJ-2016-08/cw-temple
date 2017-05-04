@@ -38,4 +38,4 @@ Another algorithm which could have been implemented is the AStar algorithm that 
 ##### Implementation of the Explore node
 
 #### EscapeNodeListManager.java -
-##### Refines which list of paths is the optimal list for the character to go to next
+##### Defines which list of paths is the optimal list for the character to go to next
